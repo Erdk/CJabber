@@ -37,7 +37,7 @@ public:
 
     // handling windows
     void repaintDecoration();
-    void connect(string username, string server, string password, string resource = string("cjabber"));
+    void connect(string username, string server, string password, string resource);
     void talkTo(JID jid);
 };
 

@@ -27,12 +27,7 @@ class WindowDecorator
     int height;
     int width;
 
-    // screen buffer
-//    vector<string> buffer;
-
 public:
-//     void AddMessageToBuffer(string msg);
-//     void PrintMessageToWindow();
 
     WINDOW* getWindow() { return msgLog; }
     void setWindow(WINDOW* win, int _height, int _width)

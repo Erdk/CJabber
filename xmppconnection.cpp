@@ -4,15 +4,14 @@
 #include <gloox/rosteritem.h>
 #include <gloox/error.h>
 #include <gloox/connectiontcpclient.h>
-#include <gloox/messagehandler.h>
 #include <gloox/messagesession.h>
-#include <gloox/message.h>
-
-#include <pthread.h>
 
 using namespace std;
 
-bool connectionWaiting = true;
+pthread_mutex_t connect_mutex = PTHREAD_MUTEX_INITIALIZER;
+pthread_cond_t  connect_var   = PTHREAD_COND_INITIALIZER;
+
+//bool connectionWaiting = true;
 
 void* polling_thread(void* client)
 {
@@ -31,10 +30,8 @@ XMPPconnection::XMPPconnection(string _username, string _server, string _resourc
     password = _password;
     stringstream msg;
 
-//    jid = JID(QString("%1@%2/%3").arg(username).arg(server).arg(resource).toStdString());
     jid = JID(username + "@" + server + "/" + resource);
     msg << jid.bare() << endl;
-    //printwin(msg);
     client = new Client(jid, password);
     sink = new Logsink();
     client->logInstance().registerLogHandler(LogLevelDebug, LogAreaAll, sink);
@@ -48,6 +45,7 @@ XMPPconnection::XMPPconnection(string _username, string _server, string _resourc
 
     pthread_t poll;
     pthread_create(&poll, NULL, polling_thread, (void*) client);
+    pthread_mutex_lock(&connect_mutex);
 }
 
 XMPPconnection::~XMPPconnection()
@@ -69,7 +67,9 @@ void XMPPconnection::sendMessage(JID jid, const char* message)
 
 void XMPPconnection::onConnect()
 {
-    connectionWaiting = false;
+    pthread_cond_signal(&connect_var);
+    pthread_mutex_unlock(&connect_mutex);
+    //connectionWaiting = false;
     stringstream msg;
     msg << "onConnect" << endl;
 

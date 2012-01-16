@@ -25,33 +25,36 @@ SettingsHandler::SettingsHandler()
             while (myfile.good())
             {
                 getline (myfile, line);
-                if (line.length() > 0 && !line.at(0) == '#')
+                if (line.length() > 0)
                 {
+                    if (line.at(0) == '#')
+                        continue;
+
                     found = line.find(tmp_username);
                     if (found != string::npos)
                     {
-                        username = line.erase(tmp_username.length());
+                        username = line.erase(0, tmp_username.length());
                         continue;
                     }
 
                     found = line.find(tmp_server);
                     if (found != string::npos)
                     {
-                        server = line.erase(tmp_server.length());
+                        server = line.erase(0, tmp_server.length());
                         continue;
                     }
 
                     found = line.find(tmp_password);
                     if (found != string::npos)
                     {
-                        password = line.erase(tmp_password.length());
+                        password = line.erase(0, tmp_password.length());
                         continue;
                     }
 
                     found = line.find(tmp_resource);
                     if (found != string::npos)
                     {
-                        resource = line.erase(tmp_resource.length());
+                        resource = line.erase(0, tmp_resource.length());
                         continue;
                     }
                 }
@@ -106,7 +109,6 @@ bool SettingsHandler::rcIsEmpty()
  */
 string SettingsHandler::getRCFilename()
 {
-    cout << "getRCFilename" << endl;
     string filepath(getenv("HOME"));
     filepath += string("/.cjabber.rc");
     return filepath;

@@ -55,10 +55,21 @@ void Program::repaintDecoration()
 // XMPP
 void Program::connect(string username, string server, string password, string resource)
 {
+    if (username.length() <= 0 || server.length() <= 0)
+    {
+        // error in configuration, aborting
+    }
+
+    if (password.length() <= 0)
+    {
+        // ask for password
+    }
+
     xmpp = new XMPPconnection(username, server, resource, password);
-
-    while(connectionWaiting); // dirty hack, think about more pleasant solution
-
+    //while(connectionWaiting); // dirty hack, think about more pleasant solution
+    //pthread_mutex_lock(&connect_mutex);
+    pthread_cond_wait(&connect_var, &connect_mutex);
+    //pthread_mutex_unlock(&connect_mutex);
     repaintDecoration();
 }
 

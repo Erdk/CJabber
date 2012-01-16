@@ -1,12 +1,13 @@
 #ifndef XMPPCONNECTION_H
 #define XMPPCONNECTION_H
 
+#include <pthread.h>
+
 #include <string>
 
 #include <gloox/gloox.h>
 #include <gloox/client.h>
 #include <gloox/connectionlistener.h>
-#include <gloox/message.h>
 #include <gloox/messagehandler.h>
 #include <gloox/rostermanager.h>
 #include <gloox/message.h>
@@ -16,7 +17,9 @@
 using namespace std;
 using namespace gloox;
 
-extern bool connectionWaiting;
+//extern bool connectionWaiting;
+extern pthread_mutex_t connect_mutex;
+extern pthread_cond_t  connect_var;
 
 class XMPPconnection : public ConnectionListener, MessageHandler
 {
