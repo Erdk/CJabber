@@ -3,14 +3,24 @@
 
 #include <string>
 #include <ncurses.h>
-
-#include "printwin.h"
-#include "xmppconnection.h"
+#include <printwin.h>
+#include <basic_window.h>
+#include <xmppconnection.h>
 
 using namespace std;
 
-class Program
+enum Command
 {
+    Continue,
+    Quit,
+};
+
+class CJabberCore : public BasicWindow
+{
+    // true if cannot read username and server from config
+    // if true => abort program execution
+    bool invalidRC;
+
     // variables and structures
     int height;
     int width;
@@ -28,17 +38,26 @@ class Program
     // simply the border around inputWindow
     WINDOW* borderWindow;
 
-    WINDOW* createWindow(int height, int width, int starty, int startx);
-    void   destroyWindow(WINDOW *local_win);
+    // person we talk to
+    JID jid;
+
+    // react on command
+    Command getCommand(string command);
+
+    // prints usage info into message log
+    void printInfo();
 
 public:
-    Program();
-    ~Program();
+    CJabberCore();
+   ~CJabberCore();
 
     // handling windows
     void repaintDecoration();
     void connect(string username, string server, string password, string resource);
-    void talkTo(JID jid);
+    void innerEventLoop();
+
+    string askForPassword();
+    void printErrorAndExit();
 };
 
 #endif //PROGRAM_H

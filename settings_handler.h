@@ -18,10 +18,10 @@ class SettingsHandler
 public:
     SettingsHandler();
 
-   string getUsername() { return username; }
-   string getServer()   { return server;   }
-   string getPassword() { return password; }
-   string getResource() { return resource; }
+    string getUsername() { return username; }
+    string getServer()   { return server;   }
+    string getPassword() { return password; }
+    string getResource() { return resource; }
 };
 
 #endif //SETTINGS_HANDLER_H

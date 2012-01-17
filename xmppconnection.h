@@ -1,18 +1,15 @@
 #ifndef XMPPCONNECTION_H
 #define XMPPCONNECTION_H
 
-#include <pthread.h>
-
 #include <string>
-
+#include <pthread.h>
+#include <logsink.h>
 #include <gloox/gloox.h>
 #include <gloox/client.h>
 #include <gloox/connectionlistener.h>
 #include <gloox/messagehandler.h>
 #include <gloox/rostermanager.h>
 #include <gloox/message.h>
-
-#include "logsink.h"
 
 using namespace std;
 using namespace gloox;
@@ -40,10 +37,10 @@ public:
     void sendMessage(JID jid, const char* msg);
 
     // disconnects from server
-    void disconnect() { client->disconnect(); }
+    void disconnect();
 
     // returns connection state
-    ConnectionState getState() { return client->state(); }
+    ConnectionState getState();
 
     // from ConnectionListener
     virtual void onConnect();

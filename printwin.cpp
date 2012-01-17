@@ -1,10 +1,8 @@
-#include "printwin.h"
+#include <printwin.h>
 
-void WindowDecorator::PrintWin(stringstream &msg, Source source)
+void MessageWindow::printWin(stringstream &msg, Source source)
 {
-    int y, x;
-    getyx(stdscr, y, x);
-    wborder(WindowDecorator::getInstance().getWindow(), ' ', ' ', ' ',' ',' ',' ',' ',' ');
+    wborder(MessageWindow::getInstance().getWindow(), ' ', ' ', ' ',' ',' ',' ',' ',' ');
 
     string msgTextTmp;
     string msgText = msg.str();
@@ -12,8 +10,8 @@ void WindowDecorator::PrintWin(stringstream &msg, Source source)
     if (width != 0)
     {
         msgTextTmp = msgText.substr(msgText.length() - rest, rest);
-        mvwprintw(WindowDecorator::getInstance().getWindow(), 0, 2, msgTextTmp.c_str());
-        wscrl(WindowDecorator::getInstance().getWindow(), -1);
+        mvwprintw(MessageWindow::getInstance().getWindow(), 0, 2, msgTextTmp.c_str());
+        wscrl(MessageWindow::getInstance().getWindow(), -1);
         msgText.erase(msgText.length() - rest, rest);
     }
 
@@ -21,16 +19,16 @@ void WindowDecorator::PrintWin(stringstream &msg, Source source)
     {
         int part = msgText.length() / width;
         msgTextTmp = msgText.substr((part - 1) * width, width);
-        mvwprintw(WindowDecorator::getInstance().getWindow(), 0, 2, msgTextTmp.c_str());
-        wscrl(WindowDecorator::getInstance().getWindow(), -1);
+        mvwprintw(MessageWindow::getInstance().getWindow(), 0, 2, msgTextTmp.c_str());
+        wscrl(MessageWindow::getInstance().getWindow(), -1);
         msgText.erase((part - 1) * width, width);
     }
 
-    //mvwprintw(WindowDecorator::getInstance().getWindow(), 0, 2, msgText.c_str());
-    wscrl(WindowDecorator::getInstance().getWindow(), -1);
+    //mvwprintw(MessageWindow::getInstance().getWindow(), 0, 2, msgText.c_str());
+    wscrl(MessageWindow::getInstance().getWindow(), -1);
 
-    box(WindowDecorator::getInstance().getWindow(), 0, 0);
-    wrefresh(WindowDecorator::getInstance().getWindow());
-    move(y, x);
+    box(MessageWindow::getInstance().getWindow(), 0, 0);
+    wrefresh(MessageWindow::getInstance().getWindow());
+    move(input_y, input_x);
     refresh();
 }

@@ -1,6 +1,6 @@
-#include "logsink.h"
-#include <sstream>
 #include <string>
+#include <sstream>
+#include <logsink.h>
 
 Logsink::Logsink()
 {

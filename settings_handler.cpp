@@ -1,13 +1,13 @@
-#include "settings_handler.h"
 #include <cstdlib>
-#include <iostream>
 #include <fstream>
+#include <iostream>
+#include <settings_handler.h>
 
 SettingsHandler::SettingsHandler()
 {
     size_t found;
     username = "";
-    server = "";
+    server   = "";
     password = "";
     resource = "";
 

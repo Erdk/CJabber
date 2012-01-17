@@ -1,9 +1,8 @@
 #ifndef LOGHANDLER_H
 #define LOGHANDLER_H
 
-#include <iostream>
 #include <fstream>
-
+#include <iostream>
 #include <gloox/loghandler.h>
 
 using namespace std;

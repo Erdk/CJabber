@@ -1,8 +1,7 @@
-#include "xmppconnection.h"
-#include "printwin.h"
-
-#include <gloox/rosteritem.h>
+#include <printwin.h>
+#include <xmppconnection.h>
 #include <gloox/error.h>
+#include <gloox/rosteritem.h>
 #include <gloox/connectiontcpclient.h>
 #include <gloox/messagesession.h>
 
@@ -58,9 +57,19 @@ XMPPconnection::~XMPPconnection()
     delete sink;
 }
 
+void XMPPconnection::disconnect()
+{
+    client->disconnect();
+}
+
 void XMPPconnection::sendMessage(JID jid, const char* message)
 {
     client->send(Message(Message::Chat, jid, string(message)));
+}
+
+ConnectionState XMPPconnection::getState()
+{
+    return client->state();
 }
 
 // ConnectionListener
@@ -153,7 +162,7 @@ void XMPPconnection::handleMessage(const Message &msg, MessageSession *session)
     {
         stringstream smsg;
         smsg << msg.from().username() << ": " << msg.body() << endl;
-        WindowDecorator::getInstance().PrintWin(smsg, They);
+        MessageWindow::getInstance().printWin(smsg, They);
     }
 }
 

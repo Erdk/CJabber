@@ -2,8 +2,8 @@
 #define PRINTWIN_H
 
 #include <string>
-#include <sstream>
 #include <vector>
+#include <sstream>
 #include <ncurses.h>
 
 using namespace std;
@@ -15,20 +15,29 @@ enum Source
     Log
 };
 
-class WindowDecorator
+class MessageWindow
 {
     // for singleton
-    WindowDecorator() {}
-    WindowDecorator(const WindowDecorator&);
-    WindowDecorator& operator=(const WindowDecorator&);
+    MessageWindow() { input_x = -1; input_y = -1; }
+    MessageWindow(const MessageWindow&);
+    MessageWindow& operator=(const MessageWindow&);
 
     // window with message log
     WINDOW* msgLog;
     int height;
     int width;
 
-public:
+    int input_x;
+    int input_y;
 
+public:
+    static MessageWindow& getInstance()
+    {
+        static MessageWindow instance;
+        return instance;
+    }
+
+    // getting WINDOW ref
     WINDOW* getWindow() { return msgLog; }
     void setWindow(WINDOW* win, int _height, int _width)
     {
@@ -37,13 +46,11 @@ public:
         width = _width - 2;
     }
 
-    void PrintWin(stringstream &msg, Source source);
+    // only setters, because this is used only locally within PrintWin
+    void setInputX(int x) { input_x = x + 1; }
+    void setInputY(int y) { input_y = y; }
 
-    static WindowDecorator& getInstance()
-    {
-        static WindowDecorator instance;
-        return instance;
-    }
+    void printWin(stringstream &msg, Source source);
 };
 
 #endif //PRINTWIN_H
