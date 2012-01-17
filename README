@@ -1,3 +1,44 @@
 CJabber
 
-Simple XMPP/Jabber client using ncurses and gloox.
+Prosty klient XMPP/Jabber napisany przy użyciu biblioteki ncurses i 
+gloox.
+
+1. Instalacja (Fedora 15, 16)
+    
+    yum install ncurses-devel gloox-devel
+    make all
+
+2. Konfiguracja
+    
+    Główny plik konfiguracyjny znajduje się w katalogu domowym użytkownika
+    pod nazwą .cjabber.rc, w nim ustawiamy pola obowiązkowe pola:
+    username=<nazwa użytkownika>
+    server=<adres serwera>
+    opcjonalnie pole:
+    password=<hasło do wyżej wymienionego konta>
+    Jeżeli hasło nie zostanie podane, to klient będzie pytał się o nie 
+    użytkownika przy każdym uruchomieniu. Drugim opcjonalnym polem
+    jest pole:
+    resources=<nazwa zasobu>
+    Identyfikuje ona zasób, za pomocą którego komunikuje się użytkownik,
+    jeżeli nie zsotanie podane to użyta zostanie domyślna wartość. Wszel-
+    kie inne linie oraz linie zaczynające się od znaku '#' zostaną zigno-
+    rowane.
+    UWAGA!
+    Po obu stronach znaku równości nie może być spacji!!!
+
+3. Użytkowanie
+    
+    Uruchamiamy program przez wpisanie w linii komend:
+    ./cjabber
+
+    Jeżeli wszystko jest skonfigurowane poprawnie, to powinno pojawić się
+    główne okno programu lub pytanie o hasło. Po poprawnym zalogowaniu mamy
+    do dyspozycji następujące komendy:
+    '/quit' - kończy pracę z programem (tak, jak klawisz <ESC>),
+    '/roster' - pobiera z serwera listę użytkowników oraz wyświetla ją,
+    '/talk <nazwa z rostera>' wysyła wiadomość do użytkownika.
+
+4. Licencja
+
+    Patrz plik: LICENSE
