@@ -7,27 +7,6 @@ PROG=cjabber
 all: $(OBJS)
 	$(CC) $(CFLAGS) $(LDFLAGS) $^ -o $(PROG)
 
-# main.o: main.cpp printwin.cpp xmppconnection.cpp logsink.cpp program.cpp settings_handler.cpp popup.cpp
-# 	$(CC) $(CFLAGS) -c main.cpp
-#
-# xmppconnection.o: xmppconnection.cpp printwin.cpp logsink.cpp
-# 	$(CC) $(CFLAGS) -c xmppconnection.cpp
-#
-# printwin.o: printwin.cpp
-# 	$(CC) $(CFLAGS) -c printwin.cpp
-#
-# logsink.o: logsink.cpp
-# 	$(CC) $(CFLAGS) -c logsink.cpp
-#
-# program.o: program.cpp xmppconnection.cpp printwin.cpp popup.cpp
-# 	$(CC) $(CFLAGS) -c program.cpp
-#
-# settings_handler.o: settings_handler.cpp
-# 	$(CC) $(CFLAGS) -c settings_handler.cpp
-#
-# popup.o: popup.cpp
-# 	$(CC) $(CFLAGS) -c popup.cpp
-
 $(OBJS): %.o: %.cpp
 	$(CC) -c $(CFLAGS) $< -o $@
 

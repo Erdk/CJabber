@@ -1,3 +1,24 @@
+/******************************************************************************
+ * Copyright 2012 Lukas 'Erdk' Redynk <mr.erdk@gmail.com>
+ * 
+ * This file is part of CJabber.
+ *
+ * CJabber is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * CJabber is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with CJabber; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ * 
+ *****************************************************************************/
+
 #include <printwin.h>
 #include <xmppconnection.h>
 #include <gloox/error.h>
@@ -8,17 +29,26 @@
 using namespace std;
 
 pthread_mutex_t connect_mutex = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t stop_mutex = PTHREAD_MUTEX_INITIALIZER;
 pthread_cond_t  connect_var   = PTHREAD_COND_INITIALIZER;
 
-//bool connectionWaiting = true;
+bool stop = false;
 
 void* polling_thread(void* client)
 {
     Client* cl = (Client*) client;
-    while(1)
+    pthread_mutex_lock(&stop_mutex);
+    bool run = !stop;
+    pthread_mutex_unlock(&stop_mutex);
+    
+    while(run)
     {
-        cl->recv(-1);
+        pthread_mutex_lock(&stop_mutex);
+        run = !stop;
+        pthread_mutex_unlock(&stop_mutex);
+        cl->recv(10);
     }
+    pthread_exit(NULL);
 }
 
 XMPPconnection::XMPPconnection(string _username, string _server, string _resource, string _password)
@@ -42,17 +72,22 @@ XMPPconnection::XMPPconnection(string _username, string _server, string _resourc
 
     client->connect(false);
 
-    pthread_t poll;
-    pthread_create(&poll, NULL, polling_thread, (void*) client);
+    pthread_mutex_lock(&stop_mutex);
+    stop = false;
+    pthread_mutex_unlock(&stop_mutex);
+    pthread_create(&reciver, NULL, polling_thread, (void*) client);
     pthread_mutex_lock(&connect_mutex);
 }
 
 XMPPconnection::~XMPPconnection()
 {
+    pthread_mutex_lock(&stop_mutex);
+    stop = true;
+    pthread_mutex_unlock(&stop_mutex);
     stringstream msg;
-    msg << "(Not expected) XMPP destructor" << endl;
-    //WindowDecorator::getInstance().PrintWin(msg, Log);
-    client->disconnect();
+    msg << "(Not expected) XMPP destructor.";
+    //while(pthread_cancel(reciver) != 0);
+    pthread_join(reciver, NULL);
     delete client;
     delete sink;
 }
@@ -81,7 +116,7 @@ void XMPPconnection::onConnect()
     //connectionWaiting = false;
     stringstream msg;
     msg << "onConnect" << endl;
-
+/*
     RosterManager* rm = client->rosterManager();
     Roster* r = rm->roster();
     for(Roster::const_iterator i = r->begin(); i != r->end(); ++i)
@@ -92,7 +127,7 @@ void XMPPconnection::onConnect()
         msg <<  first <<" - " <<  ri->jid() << endl;
     }
 
-    //WindowDecorator::getInstance().PrintWin(msg, Log);
+    MessageWindow::getInstance().printWin(msg, Log);*/
 }
 
 void XMPPconnection::onDisconnect(ConnectionError e)
@@ -116,7 +151,11 @@ void XMPPconnection::onDisconnect(ConnectionError e)
         case ConnTlsFailed:             error_message = "ConnTlsFailed";               break;
         case ConnTlsNotAvailable:       error_message = "ConnTlsNotAvailable";         break;
         case ConnCompressionFailed:     error_message = "ConnCompressionFailed";       break;
-        case ConnAuthenticationFailed:  error_message = "ConnAuthenticationFailed";    break;
+        case ConnAuthenticationFailed:  error_message = "ConnAuthenticationFailed";
+            pthread_cond_signal(&connect_var);
+            pthread_mutex_unlock(&connect_mutex);
+            //pthread_cancel(reciver);
+            break;
         case ConnUserDisconnected:      error_message = "ConnUserDisconnected";        break;
         case ConnNotConnected:          error_message = "ConnNotConnected";            break;
         default:                        error_message = "Unknown error!";
@@ -139,14 +178,14 @@ void XMPPconnection::onResourceBindError(const Error *error)
 {
     stringstream msg;
     msg << "onResourceBindError: " << error->text() << endl;
-    //printwin(msg);
+    MessageWindow::getInstance().printWin(msg, Log);
 }
 
 void XMPPconnection::onSessionCreateError(const Error *error)
 {
     stringstream msg;
     msg << "onSessionCreateError: " << error->text() << endl;
-    //printwin(msg);
+    MessageWindow::getInstance().printWin(msg, Log);
 }
 
 void XMPPconnection::onStreamEvent(StreamEvent event)

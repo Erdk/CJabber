@@ -1,3 +1,24 @@
+/******************************************************************************
+ * Copyright 2012 Lukas 'Erdk' Redynk <mr.erdk@gmail.com>
+ * 
+ * This file is part of CJabber.
+ *
+ * CJabber is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * CJabber is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with CJabber; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ * 
+ *****************************************************************************/
+
 #include <popup.h>
 #include <program.h>
 #include <keycodes.h>
@@ -55,15 +76,17 @@ void CJabberCore::repaintDecoration()
 }
 
 // XMPP
-void CJabberCore::connect(string username, string server, string password, string resource)
+XMPPstate CJabberCore::connect(string username, string server, string password, string resource)
 {
     if (username.length() <= 0 || server.length() <= 0)
     {
-        string header  = "Error!";
-        string message = "Check username or password|in configuration file!|(Press any key)";
+        invalidRC = true;
+        string header  = "Błąd!";
+        string message = "Sprawdź użytkownika i hasło|pliku konfiguracyjnym!|(Naciśnij dowolny klawisz)";
         Popup p(header, message);
         xmpp = NULL;
     }
+
     else
     {
         invalidRC = false;
@@ -77,12 +100,32 @@ void CJabberCore::connect(string username, string server, string password, strin
 
         // waiting for connection
         pthread_cond_wait(&connect_var, &connect_mutex);
-        repaintDecoration();
     }
+
+    XMPPstate xs;
+    if (xmpp == NULL)
+    {
+        xs = BadRC;
+    }
+    else
+    {
+        if (xmpp->isAuth())
+        {
+            xs = Ok;
+        }
+        else
+        {
+            xs = BadPassword;
+            delete xmpp;
+        }
+    }
+
+    return xs;
 }
 
 void CJabberCore::innerEventLoop()
 {
+    repaintDecoration();
     int c;
     bool end = invalidRC;
     string buffer = "";
@@ -105,19 +148,22 @@ void CJabberCore::innerEventLoop()
                 wclear(inputWindow);
                 wmove(inputWindow, 0, 0);
                 wrefresh(inputWindow);
-                if (jid == true && buffer.at(0) != '/')
+                if (buffer.length() > 0)
                 {
-                    bufferToSend << "ja: " << buffer;
-                    MessageWindow::getInstance().printWin(bufferToSend, Me);
-                    xmpp->sendMessage(jid, buffer.c_str());
-
-                }
-                else
-                {
-                    Command c = getCommand(buffer);
-                    if (c == Quit)
+                    if (jid == true && buffer.at(0) != '/')
                     {
-                        end = true;
+                        bufferToSend << "ja: " << buffer;
+                        MessageWindow::getInstance().printWin(bufferToSend, Me);
+                        xmpp->sendMessage(jid, buffer.c_str());
+
+                    }
+                    else
+                    {
+                        Command c = getCommand(buffer);
+                        if (c == Quit)
+                        {
+                            end = true;
+                        }
                     }
                 }
                 bufferToSend.str("");
@@ -189,8 +235,4 @@ void CJabberCore::printInfo()
       << " /quit lub wcisąć <ESC> na klawiaturze, aby wyjść." << endl
       << endl;
     MessageWindow::getInstance().printWin(s, Log);
-//     MessageWindow::getInstance().printWin(" ");
-//     MessageWindow::getInstance().printWin();
-//     MessageWindow::getInstance().printWin();
-//     MessageWindow::getInstance().printWin(" ");
 }
