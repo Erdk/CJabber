@@ -79,7 +79,7 @@ public:
     virtual void handleMessage(const Message& msg, MessageSession* session = 0);
 
     // user interaction
-    //void printRoster();
+    void printRoster();
 
     bool isAuth() { client->authed(); }
 };

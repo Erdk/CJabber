@@ -86,7 +86,6 @@ XMPPconnection::~XMPPconnection()
     pthread_mutex_unlock(&stop_mutex);
     stringstream msg;
     msg << "(Not expected) XMPP destructor.";
-    //while(pthread_cancel(reciver) != 0);
     pthread_join(reciver, NULL);
     delete client;
     delete sink;
@@ -117,16 +116,6 @@ void XMPPconnection::onConnect()
     stringstream msg;
     msg << "onConnect" << endl;
 /*
-    RosterManager* rm = client->rosterManager();
-    Roster* r = rm->roster();
-    for(Roster::const_iterator i = r->begin(); i != r->end(); ++i)
-    {
-        pair<string, RosterItem* > item = *i;
-        string first = item.first;
-        RosterItem* ri = item.second;
-        msg <<  first <<" - " <<  ri->jid() << endl;
-    }
-
     MessageWindow::getInstance().printWin(msg, Log);*/
 }
 
@@ -154,7 +143,6 @@ void XMPPconnection::onDisconnect(ConnectionError e)
         case ConnAuthenticationFailed:  error_message = "ConnAuthenticationFailed";
             pthread_cond_signal(&connect_var);
             pthread_mutex_unlock(&connect_mutex);
-            //pthread_cancel(reciver);
             break;
         case ConnUserDisconnected:      error_message = "ConnUserDisconnected";        break;
         case ConnNotConnected:          error_message = "ConnNotConnected";            break;
@@ -205,3 +193,31 @@ void XMPPconnection::handleMessage(const Message &msg, MessageSession *session)
     }
 }
 
+void XMPPconnection::printRoster()
+{
+    stringstream s;
+    if (client->authed())
+    {
+        RosterManager* rm = client->rosterManager();
+        Roster* r = rm->roster();
+        for(Roster::iterator i = r->begin(); i != r->end(); i++)
+        {
+            pair<string, RosterItem* > item = *i;
+            string first = item.first;
+            s <<  first;
+            MessageWindow::getInstance().printWin(s, Log);
+            s.str("");
+            s.flush();
+        }
+
+        s << "Lista kontaktów:";
+        MessageWindow::getInstance().printWin(s, Log);
+        s.str("");
+        s.flush();
+    }
+    else
+    {
+        s << "Użytkownik nie jest zalogowany do serwra!";
+        MessageWindow::getInstance().printWin(s, Log);
+    }
+}

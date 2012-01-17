@@ -133,6 +133,8 @@ void CJabberCore::innerEventLoop()
     int bufferLength = 0;
     int cursorPosition = 0;
 
+    printInfo();
+    
     while(!end)
     {
         c = wgetch(inputWindow);
@@ -207,7 +209,9 @@ Command CJabberCore::getCommand(string command)
                     printInfo();
                     s << "Błędnie podany identyfikator użytkownika.";
                     MessageWindow::getInstance().printWin(s, Log);
+                    return Continue;
                 }
+                return Continue;
             }
             else
             {
@@ -216,11 +220,24 @@ Command CJabberCore::getCommand(string command)
                 {
                     return Quit;
                 }
+                else
+                {
+                    found = command.find("roster");
+                    if (found != string::npos)
+                    {
+                        xmpp->printRoster();
+                        return Continue;
+                    }
+
+                    printInfo();
+                    return Continue;
+                }
             }
         }
         else
         {
             printInfo();
+            return Continue;
         }
     }
 }
@@ -228,11 +245,18 @@ Command CJabberCore::getCommand(string command)
 void CJabberCore::printInfo()
 {
     stringstream s;
-    s << "CJabber: jak korzystać?" << endl
-      << endl
-      << " /talk user@serwer.com aby rozmawiać z innym użytkownikiem." << endl
-      << endl
-      << " /quit lub wcisąć <ESC> na klawiaturze, aby wyjść." << endl
-      << endl;
+    s << " /quit lub wcisąć <ESC> na klawiaturze, aby wyjść.";
+    MessageWindow::getInstance().printWin(s, Log);
+    s.str("");
+    s.flush();
+    s << " /talk user@serwer.com aby rozmawiać z innym użytkownikiem.";
+    MessageWindow::getInstance().printWin(s, Log);
+    s.str("");
+    s.flush();
+    s << " /roster pobiera i wyświetla listę znajmoych.";
+    MessageWindow::getInstance().printWin(s, Log);
+    s.str("");
+    s.flush();
+    s << "CJabber: jak korzystać?";
     MessageWindow::getInstance().printWin(s, Log);
 }
